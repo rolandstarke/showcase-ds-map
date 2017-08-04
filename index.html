@@ -1,120 +1,184 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<html>
 
-<style>
-    #map {
-        position: fixed;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        top: 0;
-        background: #58761B;
-        cursor: default;
-    }
-</style>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <title>DS Pro - Dein Helfer für Tribal Wars 2</title>
 
-<div id="map"></div>
+    <style>
+        #map {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            top: 0;
+            background: #58761B;
+            cursor: default;
+        }
+        /* The MIT License (MIT) Copyright (c) 2014 Luke Haas https://projects.lukehaas.me/css-loaders/ */
 
-<script>
-    var mapElement = document.getElementById('map');
-    var map = L.map('map', {
-        crs: L.CRS.Simple
-    });
+        .loader,
+        .loader:after {
+            border-radius: 50%;
+            width: 10em;
+            height: 10em;
+        }
 
-    map.setView([-500, 500], 0);
-    map.zoomControl.setPosition('bottomright');
+        .loader {
+            font-size: 10px;
+            position: fixed;
+            text-indent: -9999em;
+            border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+            border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+            border-left: 1.1em solid #ffffff;
+            -webkit-transform: translateZ(0);
+            -ms-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-animation: load8 1.1s infinite linear;
+            animation: load8 1.1s infinite linear;
+            z-index: 100;
+            top: 50%;
+            left: 50%;
+            margin-left: -5.6em;
+            margin-top: -5.6em;
+        }
 
-
-    $.when($.ajax({ url: 'village.txt', dataType: 'text' }), $.ajax({ url: 'player.txt', dataType: 'text' })).then(function (villageData, playerData) {
-        var villages = villageData[0].trim().split('\n').map(function (line) {
-            var colums = line.split(',');
-            //$id, $name, $x, $y, $player, $points, $bonus_id
-            return {
-                id: +colums[0],
-                name: colums[1],
-                x: +colums[2],
-                y: +colums[3],
-                player: +colums[4],
-                points: +colums[5]
+        @-webkit-keyframes load8 {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
             }
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes load8 {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- spinner -->
+    <div class="loader">Loading...</div>
+
+    <div id="map"></div>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        var map = L.map('map', {
+            crs: L.CRS.Simple
         });
 
-
-        var players = playerData[0].trim().split('\n').map(function (line) {
-            var colums = line.split(',');
-            //$id, $name, $ally, $villages, $points, $rank
-            return {
-                id: +colums[0],
-                name: colums[1],
-                tribe: +colums[2],
-                villages: +colums[3],
-                points: +colums[4],
-                rank: +colums[5]
-            }
-        });
-        //...
+        map.setView([-500, 500], 0);
+        map.zoomControl.setPosition('bottomright');
 
 
-
-        map.on('mousemove', function (e) {
-            var y = Math.floor(e.latlng.lat * -1);
-            var x = Math.floor(e.latlng.lng);
-            var village;
-            if (map.getZoom() > 3) { //only try to get the hovered image if the user zomed in
-                for (var i = 0; i < villages.length; i++) {
-                    if (villages[i].x === x && villages[i].y === y) {
-                        village = villages[i];
-                        break;
-                    }
+        $.when($.ajax({ url: 'village.txt', dataType: 'text' }), $.ajax({ url: 'player.txt', dataType: 'text' })).then(function (villageData, playerData) {
+            var villages = villageData[0].trim().split('\n').map(function (line) {
+                var colums = line.split(',');
+                //$id, $name, $x, $y, $player, $points, $bonus_id
+                return {
+                    id: +colums[0],
+                    name: colums[1],
+                    x: +colums[2],
+                    y: +colums[3],
+                    player: +colums[4],
+                    points: +colums[5]
                 }
-            }
-            if (village) {
-                mapElement.style.cursor = 'pointer';
-            } else {
-                mapElement.style.cursor = '';
-            }
-        });
+            });
 
 
-        var CanvasLayer = L.GridLayer.extend({
-            createTile: function (coords, done) {
-                var tile = L.DomUtil.create('canvas', 'leaflet-tile');
-                var size = this.getTileSize();
-                tile.width = size.x;
-                tile.height = size.y;
+            var players = playerData[0].trim().split('\n').map(function (line) {
+                var colums = line.split(',');
+                //$id, $name, $ally, $villages, $points, $rank
+                return {
+                    id: +colums[0],
+                    name: colums[1],
+                    tribe: +colums[2],
+                    villages: +colums[3],
+                    points: +colums[4],
+                    rank: +colums[5]
+                }
+            });
+            //...
 
-                setTimeout(function () {
-                    var ctx = tile.getContext('2d');
-                    var startX = size.x * coords.x / Math.pow(2, coords.z);
-                    var endX = startX + size.x / Math.pow(2, coords.z);
-                    var startY = size.y * coords.y / Math.pow(2, coords.z);
-                    var endY = startY + size.y / Math.pow(2, coords.z);
+            var mapElement = document.getElementById('map');
+
+
+            map.on('mousemove', function (e) {
+                var y = Math.floor(e.latlng.lat * -1);
+                var x = Math.floor(e.latlng.lng);
+                var village;
+                if (map.getZoom() > 3) { //only try to get the hovered image if the user zomed in
                     for (var i = 0; i < villages.length; i++) {
-                        var village = villages[i];
-                        if (
-                            village.x >= startX - Math.pow(2, coords.z) && village.x < endX &&
-                            village.y >= startY - Math.pow(2, coords.z) && village.y < endY
-                        ) {
-                            ctx.fillStyle = '#823C0A';
-                            if (village.player === 0) {
-                                ctx.fillStyle = '#999';
-                            }
-                            ctx.fillRect((village.x - startX) * Math.pow(2, coords.z), (village.y - startY) * Math.pow(2, coords.z), Math.pow(2, coords.z), Math.pow(2, coords.z));
+                        if (villages[i].x === x && villages[i].y === y) {
+                            village = villages[i];
+                            break;
                         }
                     }
-                    done(null, tile);
-                }, 1);
+                }
+                if (village) {
+                    mapElement.style.cursor = 'pointer';
+                } else {
+                    mapElement.style.cursor = '';
+                }
+            });
 
 
-                return tile;
-            }
-        });
+            var CanvasLayer = L.GridLayer.extend({
+                createTile: function (coords, done) {
+                    var tile = L.DomUtil.create('canvas', 'leaflet-tile');
+                    var size = this.getTileSize();
+                    tile.width = size.x;
+                    tile.height = size.y;
 
-        map.addLayer(new CanvasLayer());
-    });
+                    setTimeout(function () {
+                        var ctx = tile.getContext('2d');
+                        var startX = size.x * coords.x / Math.pow(2, coords.z);
+                        var endX = startX + size.x / Math.pow(2, coords.z);
+                        var startY = size.y * coords.y / Math.pow(2, coords.z);
+                        var endY = startY + size.y / Math.pow(2, coords.z);
+                        for (var i = 0; i < villages.length; i++) {
+                            var village = villages[i];
+                            if (
+                                village.x >= startX - Math.pow(2, coords.z) && village.x < endX &&
+                                village.y >= startY - Math.pow(2, coords.z) && village.y < endY
+                            ) {
+                                ctx.fillStyle = '#823C0A';
+                                if (village.player === 0) {
+                                    ctx.fillStyle = '#999';
+                                }
+                                ctx.fillRect((village.x - startX) * Math.pow(2, coords.z), (village.y - startY) * Math.pow(2, coords.z), Math.pow(2, coords.z), Math.pow(2, coords.z));
+                            }
+                        }
+                        done(null, tile);
+                    }, 1);
 
-</script>
+
+                    return tile;
+                }
+            })
+
+            map.addLayer(new CanvasLayer());
+        }).then(function () {
+            $('.loader').remove();
+        });;
+    </script>
+</body>
+
+</html>
