@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <meta charset="utf-8">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
@@ -11,6 +12,7 @@
         left: 0;
         top: 0;
         background: #58761B;
+        cursor: default;
     }
 </style>
 
@@ -18,11 +20,13 @@
 <div id="map"></div>
 
 <script>
+    var mapElement = document.getElementById('map');
     var map = L.map('map', {
         crs: L.CRS.Simple
     });
 
     map.setView([-500, 500], 0);
+    map.zoomControl.setPosition('bottomright');
 
 
     $.ajax({ url: 'village.txt', dataType: 'text' }).then(function (r) {
@@ -38,6 +42,32 @@
                 points: +colums[5]
             }
         });
+
+        var lastMouseX;
+        var lastMouseY;
+
+        map.on('mousemove', function (e) {
+            var y = Math.floor(e.latlng.lat * -1);
+            var x = Math.floor(e.latlng.lng);
+            if (x === lastMouseX && y === lastMousey) {
+                return;
+            }
+            var village;
+            for (var i = 0; i < villages.length; i++) {
+                if (villages[i].x === x && villages[i].y === y) {
+                    village = villages[i];
+                    break;
+                }
+            }
+            if (village) {
+                mapElement.style.cursor = 'pointer';
+            } else {
+                mapElement.style.cursor = '';
+            }
+            lastMouseX = x;
+            lastMouseY = y;
+        });
+
 
         var CanvasLayer = L.GridLayer.extend({
             createTile: function (coords, done) {
@@ -58,7 +88,7 @@
                             village.x >= startX - Math.pow(2, coords.z) && village.x < endX &&
                             village.y >= startY - Math.pow(2, coords.z) && village.y < endY
                         ) {
-                            ctx.fillStyle = 'rgba(255,0,0,1)';
+                            ctx.fillStyle = '#823C0A';
                             if (village.player === 0) {
                                 ctx.fillStyle = 'rgba(150,150,150,1)';
                             } else if (village.player === 10066948) {
