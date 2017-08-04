@@ -1,0 +1,81 @@
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<style>
+    #map {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        top: 0;
+        background: #58761B;
+    }
+</style>
+
+
+<div id="map"></div>
+
+<script>
+    var map = L.map('map', {
+        crs: L.CRS.Simple
+    });
+
+    map.setView([-500, 500], 0);
+
+
+    $.ajax({ url: 'village.txt', dataType: 'text' }).then(function (r) {
+        var villages = r.trim().split('\n').map(function (line) {
+            var colums = line.split(',');
+            //62,Barbarendorf,488,489,0,532,0
+            return {
+                id: +colums[0],
+                name: colums[1],
+                x: +colums[2],
+                y: +colums[3],
+                player: +colums[4],
+                points: +colums[5]
+            }
+        });
+
+        var CanvasLayer = L.GridLayer.extend({
+            createTile: function (coords, done) {
+                var tile = L.DomUtil.create('canvas', 'leaflet-tile');
+                var size = this.getTileSize();
+                tile.width = size.x;
+                tile.height = size.y;
+
+                setTimeout(function () {
+                    var ctx = tile.getContext('2d');
+                    var startX = size.x * coords.x / Math.pow(2, coords.z);
+                    var endX = startX + size.x / Math.pow(2, coords.z);
+                    var startY = size.y * coords.y / Math.pow(2, coords.z);
+                    var endY = startY + size.y / Math.pow(2, coords.z);
+                    for (var i = 0; i < villages.length; i++) {
+                        var village = villages[i];
+                        if (
+                            village.x >= startX - Math.pow(2, coords.z) && village.x < endX &&
+                            village.y >= startY - Math.pow(2, coords.z) && village.y < endY
+                        ) {
+                            ctx.fillStyle = 'rgba(255,0,0,1)';
+                            if (village.player === 0) {
+                                ctx.fillStyle = 'rgba(150,150,150,1)';
+                            } else if (village.player === 10066948) {
+                                ctx.fillStyle = 'rgba(255,255,0,1)';
+                            }
+                            ctx.fillRect((village.x - startX) * Math.pow(2, coords.z), (village.y - startY) * Math.pow(2, coords.z), Math.pow(2, coords.z), Math.pow(2, coords.z));
+                        }
+                    }
+                    done(null, tile);
+                }, 1);
+
+
+                return tile;
+            }
+        });
+
+        map.addLayer(new CanvasLayer());
+    });
+
+</script>
