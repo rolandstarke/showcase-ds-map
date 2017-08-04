@@ -29,10 +29,10 @@
     map.zoomControl.setPosition('bottomright');
 
 
-    $.ajax({ url: 'village.txt', dataType: 'text' }).then(function (r) {
-        var villages = r.trim().split('\n').map(function (line) {
+    $.when($.ajax({ url: 'village.txt', dataType: 'text' }), $.ajax({ url: 'player.txt', dataType: 'text' })).then(function (villageData, playerData) {
+        var villages = villageData[0].trim().split('\n').map(function (line) {
             var colums = line.split(',');
-            //62,Barbarendorf,488,489,0,532,0
+            //$id, $name, $x, $y, $player, $points, $bonus_id
             return {
                 id: +colums[0],
                 name: colums[1],
@@ -43,20 +43,33 @@
             }
         });
 
-        var lastMouseX;
-        var lastMouseY;
+
+        var players = playerData[0].trim().split('\n').map(function (line) {
+            var colums = line.split(',');
+            //$id, $name, $ally, $villages, $points, $rank
+            return {
+                id: +colums[0],
+                name: colums[1],
+                tribe: +colums[2],
+                villages: +colums[3],
+                points: +colums[4],
+                rank: +colums[5]
+            }
+        });
+        //...
+
+
 
         map.on('mousemove', function (e) {
             var y = Math.floor(e.latlng.lat * -1);
             var x = Math.floor(e.latlng.lng);
-            if (x === lastMouseX && y === lastMousey) {
-                return;
-            }
             var village;
-            for (var i = 0; i < villages.length; i++) {
-                if (villages[i].x === x && villages[i].y === y) {
-                    village = villages[i];
-                    break;
+            if (map.getZoom() > 3) { //only try to get the hovered image if the user zomed in
+                for (var i = 0; i < villages.length; i++) {
+                    if (villages[i].x === x && villages[i].y === y) {
+                        village = villages[i];
+                        break;
+                    }
                 }
             }
             if (village) {
@@ -64,8 +77,6 @@
             } else {
                 mapElement.style.cursor = '';
             }
-            lastMouseX = x;
-            lastMouseY = y;
         });
 
 
@@ -90,7 +101,7 @@
                         ) {
                             ctx.fillStyle = '#823C0A';
                             if (village.player === 0) {
-                                ctx.fillStyle = 'rgba(150,150,150,1)';
+                                ctx.fillStyle = '#999';
                             }
                             ctx.fillRect((village.x - startX) * Math.pow(2, coords.z), (village.y - startY) * Math.pow(2, coords.z), Math.pow(2, coords.z), Math.pow(2, coords.z));
                         }
