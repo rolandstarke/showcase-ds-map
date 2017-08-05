@@ -44,7 +44,7 @@ $.when(
             villages: +colums[3],
             points: +colums[4],
             rank: +colums[5]
-        }
+        };
     }
     playerData = null; lines = null;
 
@@ -62,7 +62,7 @@ $.when(
             points: +colums[5],
             allPoints: +colums[6],
             rank: +colums[7]
-        }
+        };
     }
     tribeData = null; lines = null;
 
@@ -105,7 +105,7 @@ $.when(
 
             return tile;
         }
-    })
+    });
     var villagesLayer = new VillagesLayer();
 
 
@@ -157,7 +157,7 @@ $.when(
             $('#map_hover_popup').find('.village_name').text(village.name);
             $('#map_hover_popup').find('.village_points').text(village.points);
             if (players[village.player] && players[village.player].tribe && tribes[players[village.player].tribe]) {
-                $('#map_hover_popup').find('.village_tribe').text(tribes[players[village.player].tribe].name).closest('tr').css('display', '');;
+                $('#map_hover_popup').find('.village_tribe').text(tribes[players[village.player].tribe].name).closest('tr').css('display', '');
             } else {
                 $('#map_hover_popup').find('.village_tribe').closest('tr').css('display', 'none');
             }
@@ -167,7 +167,6 @@ $.when(
             } else {
                 $('#map_hover_popup').find('.village_player').closest('tr').css('display', 'none');
                 $('#map_hover_popup').find('.village_no_player').closest('tr').css('display', '');
-
             }
 
             updatePosition($('#map_hover_popup'), e.originalEvent);
