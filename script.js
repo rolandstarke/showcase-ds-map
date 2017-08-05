@@ -102,7 +102,7 @@ $.when(
                     }
                 }
                 done(null, tile);
-            }, 10);
+            }, Math.floor(Math.random() * 1000));
 
 
             return tile;
