@@ -74,12 +74,10 @@ $.when(
             tile.height = size.y;
 
             setTimeout(function () {
-                tile.width = size.x;
-                tile.height = size.y;
                 var ctx = tile.getContext('2d');
-                //ctx.fillStyle = '#58761B';
-                ctx.fillStyle = 'rgb(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ')';
+                ctx.fillStyle = '#58761B';
                 ctx.fillRect(0, 0, size.x, size.y);
+
 
                 var squareSize = Math.pow(2, coords.z);
                 var startX = size.x * coords.x / squareSize;
@@ -102,7 +100,7 @@ $.when(
                     }
                 }
                 done(null, tile);
-            }, Math.floor(Math.random() * 1000));
+            }, 1);
 
 
             return tile;
