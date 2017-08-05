@@ -73,8 +73,10 @@ $.when(
             var size = this.getTileSize();
             tile.width = size.x;
             tile.height = size.y;
+            console.log(coords);
 
             setTimeout(function () {
+                console.log(coords);
                 var ctx = tile.getContext('2d');
                 ctx.fillStyle = '#58761B';
                 ctx.fillRect(0, 0, size.x, size.y);
