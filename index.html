@@ -5,29 +5,84 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Karte Die Stämme Welt 144</title>
+    <title>Die Stämme Karte Welt 144</title>
 
     <style>
-        #map {
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            top: 0;
-            background: #58761B;
-            cursor: default;
+        @media (min-width: 801px) {
+            #wrapper {
+                max-width: 1200px;
+                margin: 0 auto;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            #map_container {
+                height: 800px;
+                /* fallback if flex dosn't work */
+                flex: 1;
+                position: relative;
+                border: 1px solid #7d510f;
+            }
         }
-        
-        .loader,
-        .loader:after {
+
+        @media (max-width: 800px) {
+            #map_container {
+                position: fixed;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                top: 0;
+            }
+        }
+
+
+        html,
+        body {
+            height: 100%;
+            background: #ded3b9;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Verdana, Arial, sans-serif;
+        }
+
+        .ds_table th {
+            background: #e5c27e;
+            background: linear-gradient(to bottom, #e5c27e 0%, #c1a264 100%);
+            padding: 2px 3px;
+            font-size: 0.8em;
+            text-align: left;
+        }
+
+        .ds_table td {
+            background: #f4e4bc;
+            padding: 2px 3px;
+            font-size: 0.8em;
+        }
+
+        #map_hover_popup {
+            background: #EAD5AA;
+            position: absolute;
+            z-index: 1000;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            cursor: default;
+            background: #58761B;
+        }
+
+        #loader,
+        #loader:after {
             border-radius: 50%;
             width: 10em;
             height: 10em;
         }
 
-        .loader {
+        #loader {
             font-size: 10px;
-            position: fixed;
+            position: absolute;
             text-indent: -9999em;
             border-top: 1.1em solid rgba(255, 255, 255, 0.2);
             border-right: 1.1em solid rgba(255, 255, 255, 0.2);
@@ -70,76 +125,120 @@
 </head>
 
 <body>
-    <!-- spinner -->
-    <div class="loader">Loading...</div>
 
-    <div id="map"></div>
+
+    <div id="wrapper">
+        <h1>Die Stämme Karte Welt 144</h1>
+        <div id="map_container">
+            <!-- spinner -->
+            <div id="loader">Loading...</div>
+            <div id="map"></div>
+        </div>
+        cool
+
+        <!-- Map Hover Popup -->
+        <div id="map_hover_popup" style="display: none;">
+            <table class="ds_table">
+                <tr>
+                    <th colspan="2" class="village_name">Dorfname</th>
+                </tr>
+                <tr>
+                    <td>Punkte:</td>
+                    <td class="village_points">1000</td>
+                </tr>
+                <tr>
+                    <td>Besitzer:</td>
+                    <td class="village_player">1000</td>
+                </tr>
+                <tr class="village_no_player">
+                    <td colspan="2">Verlassen</td>
+                </tr>
+                <tr>
+                    <td>Stamm:</td>
+                    <td class="village_tribe">1000</td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+
+
+
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script>
-        var map = L.map('map', {
-            crs: L.CRS.Simple
-        });
 
-        map.setView([-500, 500], 0);
+    <script>
+        var mapElement = document.getElementById('map');
+        var map = L.map(mapElement, {
+            crs: L.CRS.Simple,
+            maxZoom: 7,
+            center: [-500, 500],
+            zoom: 0,
+            maxBounds: [[0, 0], [-1000, 1000]]
+        });
         map.zoomControl.setPosition('bottomright');
 
 
-        $.when($.ajax({ url: 'village.txt', dataType: 'text' }), $.ajax({ url: 'player.txt', dataType: 'text' })).then(function (villageData, playerData) {
-            var villages = villageData[0].trim().split('\n').map(function (line) {
-                var colums = line.split(',');
+        $.when(
+            $.ajax({ url: 'village.txt', dataType: 'text' }),
+            $.ajax({ url: 'player.txt', dataType: 'text' }),
+            $.ajax({ url: 'ally.txt', dataType: 'text' })
+        ).then(function (villageData, playerData, tribeData) {
+            var villages = {};
+            var lines = villageData[0].trim().split('\n');
+            for (var i = 0; i < lines.length; i++) {
+                var colums = lines[i].split(',');
                 //$id, $name, $x, $y, $player, $points, $bonus_id
-                return {
+                villages[colums[0]] = {
                     id: +colums[0],
-                    name: colums[1],
+                    name: decodeURIComponent(colums[1].replace(/\+/g, ' ')),
                     x: +colums[2],
                     y: +colums[3],
                     player: +colums[4],
                     points: +colums[5]
-                }
-            });
+                };
+            }
+            villageData = null; lines = null;
 
-
-            var players = playerData[0].trim().split('\n').map(function (line) {
-                var colums = line.split(',');
+            var players = {};
+            var lines = playerData[0].trim().split('\n');
+            for (var i = 0; i < lines.length; i++) {
+                var colums = lines[i].split(',');
                 //$id, $name, $ally, $villages, $points, $rank
-                return {
+                players[colums[0]] = {
                     id: +colums[0],
-                    name: colums[1],
+                    name: decodeURIComponent(colums[1].replace(/\+/g, ' ')),
                     tribe: +colums[2],
                     villages: +colums[3],
                     points: +colums[4],
                     rank: +colums[5]
                 }
-            });
+            }
+            playerData = null; lines = null;
             //...
 
-            var mapElement = document.getElementById('map');
-
-
-            map.on('mousemove', function (e) {
-                var y = Math.floor(e.latlng.lat * -1);
-                var x = Math.floor(e.latlng.lng);
-                var village;
-                if (map.getZoom() > 3) { //only try to get the hovered image if the user zomed in
-                    for (var i = 0; i < villages.length; i++) {
-                        if (villages[i].x === x && villages[i].y === y) {
-                            village = villages[i];
-                            break;
-                        }
-                    }
+            var tribes = {};
+            var lines = tribeData[0].trim().split('\n');
+            for (var i = 0; i < lines.length; i++) {
+                var colums = lines[i].split(',');
+                //$id, $name, $tag, $members, $villages, $points, $all_points, $rank
+                tribes[colums[0]] = {
+                    id: +colums[0],
+                    name: decodeURIComponent(colums[1].replace(/\+/g, ' ')),
+                    tag: decodeURIComponent(colums[2].replace(/\+/g, ' ')),
+                    members: +colums[3],
+                    villages: +colums[4],
+                    points: +colums[5],
+                    allPoints: +colums[6],
+                    rank: +colums[7]
                 }
-                if (village) {
-                    mapElement.style.cursor = 'pointer';
-                } else {
-                    mapElement.style.cursor = '';
-                }
-            });
+            }
+            tribeData = null; lines = null;
 
-
-            var CanvasLayer = L.GridLayer.extend({
+            var VillagesLayer = L.GridLayer.extend({
                 createTile: function (coords, done) {
                     var tile = L.DomUtil.create('canvas', 'leaflet-tile');
                     var size = this.getTileSize();
@@ -148,21 +247,22 @@
 
                     setTimeout(function () {
                         var ctx = tile.getContext('2d');
-                        var startX = size.x * coords.x / Math.pow(2, coords.z);
-                        var endX = startX + size.x / Math.pow(2, coords.z);
-                        var startY = size.y * coords.y / Math.pow(2, coords.z);
-                        var endY = startY + size.y / Math.pow(2, coords.z);
-                        for (var i = 0; i < villages.length; i++) {
+                        var squareSize = Math.pow(2, coords.z);
+                        var startX = size.x * coords.x / squareSize;
+                        var endX = startX + size.x / squareSize;
+                        var startY = size.y * coords.y / squareSize;
+                        var endY = startY + size.y / squareSize;
+                        for (var i in villages) {
                             var village = villages[i];
                             if (
-                                village.x >= startX - Math.pow(2, coords.z) && village.x < endX &&
-                                village.y >= startY - Math.pow(2, coords.z) && village.y < endY
+                                village.x >= startX - squareSize && village.x < endX &&
+                                village.y >= startY - squareSize && village.y < endY
                             ) {
                                 ctx.fillStyle = '#823C0A';
                                 if (village.player === 0) {
-                                    ctx.fillStyle = '#999';
+                                    ctx.fillStyle = '#9f9f9f';
                                 }
-                                ctx.fillRect((village.x - startX) * Math.pow(2, coords.z), (village.y - startY) * Math.pow(2, coords.z), Math.pow(2, coords.z), Math.pow(2, coords.z));
+                                ctx.fillRect((village.x - startX) * squareSize, (village.y - startY) * squareSize, squareSize, squareSize);
                             }
                         }
                         done(null, tile);
@@ -172,10 +272,81 @@
                     return tile;
                 }
             })
+            var villagesLayer = new VillagesLayer();
 
-            map.addLayer(new CanvasLayer());
+
+
+            map.addLayer(villagesLayer);
+
+
+
+            function updatePosition($element, e) {
+                if ($(window).width() > $element.width() + (e.originalEvent.clientX + 20)) {
+                    var left = (e.originalEvent.clientX + 20);
+                } else {
+                    var left = (e.originalEvent.clientX - 20) - $element.width();
+                }
+                if ($(window).height() > $element.height() + (e.originalEvent.clientY + 20)) {
+                    var top = (e.originalEvent.clientY + 20);
+                } else {
+                    var top = (e.originalEvent.clientY - 20) - $element.height();
+                }
+                $element
+                    .css('left', left + 'px')
+                    .css('top', top + 'px')
+            }
+            var lastX;
+            var lastY;
+            map.on('mousemove', function (e) {
+                var y = Math.floor(e.latlng.lat * -1);
+                var x = Math.floor(e.latlng.lng);
+                if (lastX === x && lastY === y) {
+                    updatePosition($('#map_hover_popup'), e);
+                    return;
+                }
+                lastX = x; lastY = y;
+
+                var village;
+                if (map.getZoom() >= 3) { //only try to get the hovered image if the user zomed in
+                    for (var i in villages) {
+                        if (villages[i].x === x && villages[i].y === y) {
+                            village = villages[i];
+                            break;
+                        }
+                    }
+                }
+
+                if (village) {
+                    $('#map_hover_popup').find('.village_name').text(village.name);
+                    $('#map_hover_popup').find('.village_points').text(village.points);
+                    if (players[village.player] && players[village.player].tribe && tribes[players[village.player].tribe]) {
+                        $('#map_hover_popup').find('.village_tribe').text(tribes[players[village.player].tribe].name).closest('tr').css('display', '');;
+                    } else {
+                        $('#map_hover_popup').find('.village_tribe').closest('tr').css('display', 'none');
+                    }
+                    if (players[village.player] && players[village.player]) {
+                        $('#map_hover_popup').find('.village_player').text(players[village.player].name).closest('tr').css('display', '');
+                        $('#map_hover_popup').find('.village_no_player').closest('tr').css('display', 'none');
+                    } else {
+                        $('#map_hover_popup').find('.village_player').closest('tr').css('display', 'none');
+                        $('#map_hover_popup').find('.village_no_player').closest('tr').css('display', '');
+                        
+                    }
+
+                    updatePosition($('#map_hover_popup'), e);
+                    $('#map_hover_popup').css('display', 'block');
+                    mapElement.style.cursor = 'pointer';
+                } else {
+                    mapElement.style.cursor = '';
+                    $('#map_hover_popup').css('display', 'none');
+                }
+            });
+            map.on('mouseout', function () {
+                $('#map_hover_popup').css('display', 'none');
+            });
+
         }).then(function () {
-            $('.loader').remove();
+            $('#loader').remove();
         });;
     </script>
 </body>
