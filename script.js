@@ -47,7 +47,6 @@ $.when(
         }
     }
     playerData = null; lines = null;
-    //...
 
     var tribes = {};
     var lines = tribeData[0].trim().split('\n');
