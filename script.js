@@ -170,15 +170,15 @@ $.when(
             }
 
             updatePosition($('#map_hover_popup'), e.originalEvent);
-            $('#map_hover_popup').css('display', 'block');
+            $('#map_hover_popup').css('display', 'block').css('opacity', '1');
             mapElement.style.cursor = 'pointer';
         } else {
             mapElement.style.cursor = '';
-            $('#map_hover_popup').css('display', 'none');
+            $('#map_hover_popup').css('display', 'none').css('opacity', '0');
         }
     });
     map.on('mouseout', function () {
-        $('#map_hover_popup').css('display', 'none');
+        $('#map_hover_popup').css('display', 'none').css('opacity', '0');
     });
 
 }).then(function () {

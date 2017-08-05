@@ -54,6 +54,7 @@ body {
     background: #EAD5AA;
     position: absolute;
     z-index: 1000;
+    transition: opacity 0s linear 0.05s;
 }
 
 #map {
