@@ -102,7 +102,7 @@ $.when(
                     }
                 }
                 done(null, tile);
-            }, 1);
+            }, 10);
 
 
             return tile;
