@@ -76,6 +76,7 @@ $.when(
             setTimeout(function () {
                 var ctx = tile.getContext('2d');
                 ctx.fillStyle = '#58761B';
+                ctx.fillStyle = 'rga(' + Math.floor(Math.random() * 255) + ',' + + Math.floor(Math.random() * 255), ',' + + Math.floor(Math.random() * 255) + ')';
                 ctx.fillRect(0, 0, size.x, size.y);
 
 
