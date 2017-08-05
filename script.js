@@ -76,11 +76,17 @@ $.when(
 
             setTimeout(function () {
                 var ctx = tile.getContext('2d');
+                ctx.fillStyle = '#58761B';
+                ctx.fillRect(0, 0, size.x, size.y);
+
+
                 var squareSize = Math.pow(2, coords.z);
                 var startX = size.x * coords.x / squareSize;
                 var endX = startX + size.x / squareSize;
                 var startY = size.y * coords.y / squareSize;
                 var endY = startY + size.y / squareSize;
+
+
                 for (var i in villages) {
                     var village = villages[i];
                     if (
@@ -122,7 +128,7 @@ $.when(
         }
         $element
             .css('left', left + 'px')
-            .css('top', top + 'px')
+            .css('top', top + 'px');
     }
     var lastX;
     var lastY;
