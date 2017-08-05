@@ -75,10 +75,9 @@ $.when(
 
             setTimeout(function () {
                 var ctx = tile.getContext('2d');
-                ctx.fillStyle = '#58761B';
-                ctx.fillStyle = 'rga(' + Math.floor(Math.random() * 255) + ',' + + Math.floor(Math.random() * 255), ',' + + Math.floor(Math.random() * 255) + ')';
+                //ctx.fillStyle = '#58761B';
+                ctx.fillStyle = 'rgb(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ')';
                 ctx.fillRect(0, 0, size.x, size.y);
-
 
                 var squareSize = Math.pow(2, coords.z);
                 var startX = size.x * coords.x / squareSize;
