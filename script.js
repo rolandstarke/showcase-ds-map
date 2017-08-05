@@ -68,42 +68,40 @@ $.when(
     tribeData = null; lines = null;
 
     var VillagesLayer = L.GridLayer.extend({
-        createTile: function (coords) {
+        createTile: function (coords, done) {
             var tile = L.DomUtil.create('canvas', 'leaflet-tile');
             var size = this.getTileSize();
             tile.width = size.x;
             tile.height = size.y;
-            console.log(coords);
 
-            //setTimeout(function () {
-            //    console.log(coords);
-            var ctx = tile.getContext('2d');
-            ctx.fillStyle = '#58761B';
-            ctx.fillRect(0, 0, size.x, size.y);
+            setTimeout(function () {
+                var ctx = tile.getContext('2d');
+                ctx.fillStyle = '#58761B';
+                ctx.fillRect(0, 0, size.x, size.y);
 
 
-            var squareSize = Math.pow(2, coords.z);
-            var startX = size.x * coords.x / squareSize;
-            var endX = startX + size.x / squareSize;
-            var startY = size.y * coords.y / squareSize;
-            var endY = startY + size.y / squareSize;
+                var squareSize = Math.pow(2, coords.z);
+                var startX = size.x * coords.x / squareSize;
+                var endX = startX + size.x / squareSize;
+                var startY = size.y * coords.y / squareSize;
+                var endY = startY + size.y / squareSize;
 
 
-            for (var i in villages) {
-                var village = villages[i];
-                if (
-                    village.x >= startX - squareSize && village.x < endX &&
-                    village.y >= startY - squareSize && village.y < endY
-                ) {
-                    ctx.fillStyle = '#823C0A';
-                    if (village.player === 0) {
-                        ctx.fillStyle = '#9f9f9f';
+                for (var i in villages) {
+                    var village = villages[i];
+                    if (
+                        village.x >= startX - squareSize && village.x < endX &&
+                        village.y >= startY - squareSize && village.y < endY
+                    ) {
+                        ctx.fillStyle = '#823C0A';
+                        if (village.player === 0) {
+                            ctx.fillStyle = '#9f9f9f';
+                        }
+                        ctx.fillRect((village.x - startX) * squareSize, (village.y - startY) * squareSize, squareSize, squareSize);
                     }
-                    ctx.fillRect((village.x - startX) * squareSize, (village.y - startY) * squareSize, squareSize, squareSize);
                 }
-            }
-            //done(null, tile);
-            //}, 1);
+                done(null, tile);
+            }, 1);
 
 
             return tile;
