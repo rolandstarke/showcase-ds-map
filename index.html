@@ -298,11 +298,14 @@
             var lastX;
             var lastY;
             map.on('mousemove', function (e) {
+                if('ontouchstart' in window || navigator.maxTouchPoints > 0){
+                    return; //dont show hover popup on touch screens
+                }
                 var y = Math.floor(e.latlng.lat * -1);
                 var x = Math.floor(e.latlng.lng);
                 if (lastX === x && lastY === y) {
                     updatePosition($('#map_hover_popup'), e);
-                    return;
+                    return;  //if the x,y is same as the last mouse move don't search the village again
                 }
                 lastX = x; lastY = y;
 
